@@ -29,9 +29,22 @@ Authenticator::Authenticator(const Config &config) {
     Log::log_with_date_time("connecting to MySQL server " + config.mysql.server_addr + ':' + to_string(config.mysql.server_port), Log::INFO);
     if (!config.mysql.ca.empty()) {
         if (!config.mysql.key.empty() && !config.mysql.cert.empty()) {
-            mysql_ssl_set(&con, config.mysql.key.c_str(), config.mysql.cert.c_str(), config.mysql.ca.c_str(), nullptr, nullptr);
+          // mysql_ssl_set(&con, config.mysql.key.c_str(),
+          // config.mysql.cert.c_str(), config.mysql.ca.c_str(), nullptr,
+          // nullptr);
+          mysql_options(&con, MYSQL_OPT_SSL_KEY, config.mysql.key.c_str());
+          mysql_options(&con, MYSQL_OPT_SSL_CERT, config.mysql.cert.c_str());
+          mysql_options(&con, MYSQL_OPT_SSL_CA, config.mysql.ca.c_str());
+          mysql_options(&con, MYSQL_OPT_SSL_CAPATH, nullptr);
+          mysql_options(&con, MYSQL_OPT_SSL_CIPHER, nullptr);
         } else {
-            mysql_ssl_set(&con, nullptr, nullptr, config.mysql.ca.c_str(), nullptr, nullptr);
+          // mysql_ssl_set(&con, nullptr, nullptr, config.mysql.ca.c_str(),
+          // nullptr, nullptr);
+          mysql_options(&con, MYSQL_OPT_SSL_KEY, nullptr);
+          mysql_options(&con, MYSQL_OPT_SSL_CERT, nullptr);
+          mysql_options(&con, MYSQL_OPT_SSL_CA, config.mysql.ca.c_str());
+          mysql_options(&con, MYSQL_OPT_SSL_CAPATH, nullptr);
+          mysql_options(&con, MYSQL_OPT_SSL_CIPHER, nullptr);
         }
     }
     if (mysql_real_connect(&con, config.mysql.server_addr.c_str(),
